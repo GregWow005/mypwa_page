@@ -62,7 +62,7 @@ var fetchDataApp = (function(){
             //console.log('item: ',obj);
             createCombo.built(result.data,$('.js-target-combo-cities'),'',dataAppDDBB.getStations);
         } else {
-            var url = 'http://api.citybik.es/v2/networks/';
+            var url = 'https://api.citybik.es/v2/networks/';
             fetch(url).then(response => {
                 return response.json();
                 }).then(data => {
@@ -110,7 +110,7 @@ var fetchDataApp = (function(){
 			templates.getCompanyTemplate(result);
 			//Combo.built(obj.data,$('.js-target-combo-stations'),'',dataAppDDBB.getStations);
 		} else {
-			var url = 'http://api.citybik.es/v2/networks/' + city_id;
+			var url = 'https://api.citybik.es/v2/networks/' + city_id;
 			fetch(url).then(response => {
 				return response.json();
 			}).then(data => {
