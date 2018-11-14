@@ -273,7 +273,7 @@ var templates = (function(){
         createCombo.built(stations,select_stations,'',dataAppDDBB.getStation);
     };
     var getStationTemplate= function(station){
-        console.log('COMMENT: ', station.extra);
+        console.log('COMMENT: ', station);
         var time_update = moment(station.timestamp).format("DD-MM-YYYY HH:mm");
         var address = station.extra.address || station.extra.description ||  '-';
         var status =  station.extra.status || '+';
