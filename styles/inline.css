@@ -403,3 +403,22 @@ body {
   .mdl-button--primary.mdl-button--primary.mdl-button--raised, .mdl-button--primary.mdl-button--primary.mdl-button--fab {
     color: white;
     background-color: #3f51b5; }
+
+
+    /*MY STYLES*/
+    .top-section{
+        background: #FA7B23;
+    }
+    .middle-section-one{
+        background: #198FB9;
+    }
+    .middle-section-two{
+        background: #FDFDF7;
+    }
+    .middle-section-three{
+        background: #415333;
+    }
+    .footer{
+        background: #3F51B5
+    }
+    /*MY STYLES*/
