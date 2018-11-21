@@ -254,7 +254,7 @@ var templates = (function(){
                 </div>
                 <div class="media-content">
                 <p class="title is-4">${result.company}</p>
-                <p class="subtitle is-6 js-company-id" data-companyid="${result.code_city}">${result.name}</p>
+                <p class="is-6 js-company-id" data-companyid="${result.code_city}">${result.name}</p>
                 </div>
             </div>
         
