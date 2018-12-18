@@ -10,7 +10,7 @@ var createCombo = (function(){
         target.html('');
         var array = new Uint32Array(1);
         var combo_class = 'js-combo-' + window.crypto.getRandomValues(array);
-        var select_element = $('<select class="' + combo_class + '"></select>');
+        var select_element = $('<select class=" select ' + combo_class + '"></select>');
         /**
          * dataCombo structure
          * option.value -- option value
@@ -244,18 +244,11 @@ var templates = (function(){
     var getCompanyTemplate = function(result){
         //console.log('GETCOMPANYTEMPLATE',result);
 		var stations = result.data;
-        var template = `<div class="card">
-        <div class="card-content">
-            <div class="media">
-                <div class="media-left">
-                <figure class="image is-48x48">
-                    <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
-                </figure>
-                </div>
-                <div class="media-content">
+        var template = `
+        <div>
+            <div>
                 <p class="title is-4">${result.company}</p>
                 <p class="is-6 js-company-id" data-companyid="${result.code_city}">${result.name}</p>
-                </div>
             </div>
         
             <div class="content">
@@ -265,7 +258,6 @@ var templates = (function(){
                 </div>
             </div>
             <div class="js-data-station"></div>
-            </div>
         </div>`;
         $('.js-card-stations').html(template);
         var stations_data = [];
