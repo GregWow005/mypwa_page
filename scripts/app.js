@@ -42,7 +42,7 @@ var createCombo = (function(){
 })();
 
 var fetchDataApp = (function(){
-    var getCities = function(value,result){
+    var getCities = async function(value,result){
         /**
 		 * No existe los datos en la BBDD asi que acusimos a la API
 		 * Obtenmos datos de la API
@@ -57,39 +57,39 @@ var fetchDataApp = (function(){
 		 * 
 		 * TODO - EXPERT - Comprobar que todas las ciudades en la BBDD son las mismas que las que 
 		 * existe en la API. Verificar las actualizaciones 
-		*/
+        */
+        console.log('result: ', result);
         if(typeof result !== 'undefined'){
             //console.log('item: ',obj);
             createCombo.built(result.data,$('.js-target-combo-cities'),'',dataAppDDBB.getStations);
         } else {
             var url = 'https://api.citybik.es/v2/networks/';
-            fetch(url).then(response => {
-                return response.json();
-                }).then(data => {
-                    // Work with JSON data here
-                    let cities = data.networks.filter(obj => obj.location.country === value);
-                    var cities_data = [];
-                    var city_data = {};
-                    
-                    $.each(cities, function (index, obj) { 
-                        city_data = {value: obj.id, text: obj.location.city};
-                        cities_data.push(city_data);
-                    });
-                    var cities_bbdd = {
-                        'code_country' 	: value,
-                        'data' 			: cities_data
-                    };
-                    // Guardamos en la base de datos las ciudades
-                    console.log('cities_bbdd: ', cities_bbdd);
-                    transactions.createCities(transactions.dbPromise,cities_bbdd,transactions.ok);
-                }).catch(err => {
-                    // Do something for an error here
-                    console.log('Upsss! ', err);
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+                let cities = data.networks.filter(obj => obj.location.country === value);
+                var cities_data = [];
+                var city_data = {};
+                
+                $.each(cities, function (index, obj) { 
+                    city_data = {value: obj.id, text: obj.location.city};
+                    cities_data.push(city_data);
                 });
+                var cities_bbdd = {
+                    'code_country' 	: value,
+                    'data' 			: cities_data
+                };
+                // Guardamos en la base de datos las ciudades
+                console.log('cities_bbdd: ', cities_bbdd);
+                transactions.createCities(transactions.dbPromise,cities_bbdd,transactions.ok);
+            } catch(err) {
+                // catches errors both in fetch and response.json
+                console.log('Upsss! ', err);
+            }
         }
         
     };
-	var getStations = function(city_id,result){
+	var getStations = async function(city_id,result){
 		/**
 		 * No existe los datos en la BBDD asi que acusimos a la API
 		 * Obtenmos datos de la API
@@ -105,17 +105,20 @@ var fetchDataApp = (function(){
 		 * TODO - EXPERT - Comprobar que todas las ciudades en la BBDD son las mismas que las que 
 		 * existe en la API. Verificar las actualizaciones 
 		 */
+        console.log('getStations: ', typeof result !== 'undefined');
 		if(typeof result !== 'undefined'){
 			//console.log('result: ',result);
 			templates.getCompanyTemplate(result);
 			//Combo.built(obj.data,$('.js-target-combo-stations'),'',dataAppDDBB.getStations);
 		} else {
-			var url = 'https://api.citybik.es/v2/networks/' + city_id;
-			fetch(url).then(response => {
-				return response.json();
-			}).then(data => {
-                    // Work with JSON data here
-                    console.log('COMMENT: ', data);
+            /**
+             * Comprobar si existe conexión
+             * Si no hay conexión mostrar mensaje de advertencia
+             */
+            var url = 'https://api.citybik.es/v2/networks/' + city_id;
+            try {
+                var response = await fetch(url);
+                var data = await response.json();
 					let stations = data.network.stations;
 					let new_stations = stations.map((obj, i, stations) => {
 						return {
@@ -128,7 +131,7 @@ var fetchDataApp = (function(){
                             'timestamp'		: obj.timestamp,
                             'extra'			: obj.extra
 						};
-					  });
+					});
 					var stations_bbdd = {
                         'company'     : data.network.company,
                         'name'        : data.network.name,
@@ -140,10 +143,10 @@ var fetchDataApp = (function(){
 					// Guardamos en la base de datos las ciudades
 					console.log('stations_bbdd: ', stations_bbdd);
 					transactions.createStations(transactions.dbPromise,stations_bbdd,transactions.ok);
-			}).catch(err => {
-				// Do something for an error here
-				console.log('Upsss! ', err);
-			});
+            } catch (err) {
+                console.error('Upsss! ', err);
+                $('.js-target-combo-cities').html('Uppss! Parece que no hemos podido conectarnos la red :(');
+            }
 		}
     };
     var getStation = function(city_id,result){
@@ -167,7 +170,6 @@ var fetchDataApp = (function(){
         getStation  : getStation
 	};
 })();
-
 
 var dataAppDDBB = (function(){
     var getCountries = function(countries){
@@ -414,11 +416,11 @@ var transactions = (function(){
             return store.openCursor();
         }).then(function logItems(cursor) {
             if (!cursor) {
-              return;
+            return;
             }
             console.log('Cursored at:', cursor.key);
             for (var field in cursor.value) {
-              console.log('CURSOR: ',field,cursor.value[field]);
+            console.log('CURSOR: ',field,cursor.value[field]);
             }
             return cursor.continue().then(logItems);
         }).then(function() {
@@ -453,11 +455,10 @@ var transactions = (function(){
 		navigator.serviceWorker
 		.register('./service-worker.js')
 		.then(function() { 
-			//console.log('Service Worker Registered'); 
+            //console.log('Service Worker Registered');
 		});
 	}
 })();
-
 
 
 /**
@@ -566,72 +567,5 @@ var transactions = (function(){
  *    
  * 
  */
-
-
-
-/* var dataApp = (function(){
-    var fetchData = function(url,fn){
-        var networkDataReceived = false;
-        // fetch fresh data
-        var networkUpdate = fetch(url).then(function(response) {
-            return response.json();
-        }).then(function(data) {
-            networkDataReceived = true;
-            fn(data,'NETWORK');
-        });
-        
-        // fetch cached data
-        caches.match(url).then(function(response) {
-            if (!response) throw Error("No data");
-            return response.json();
-        }).then(function(data) {
-            // don't overwrite newer network data
-            if (!networkDataReceived) {
-                fn(data,'CACHES');
-            }
-        }).catch(function() {
-            // we didn't get cached data, the network is our last hope;  
-            return networkUpdate;
-        }).catch(function(err){
-            console.log('error: ', err);
-        });
-    };
-    var getCountries = function(data,type){
-        console.log('Countries: ', data,type);
-    };
-    var getStations = function(data,type){
-        console.log('Stations: ', data,type);
-        $('body').append(type);
-        templates.getCompanyTemplate(data);
-    };
-    
-    return {
-        fetchData       :  fetchData,
-        getCountries    :  getCountries,
-        getStations     :  getStations
-        };
-
-})(); 
-
---------------------------------------------------
-var LocalStorageDataApi = (function(){
-
-    var getDataLocalStorage = function(item){
-        window[item] = localStorage.getItem(item) ? JSON.parse(localStorage.getItem(item)) : window[item] ;
-        return window[item];
-    };
-    var setDataLocalStorage = function(item,data){
-        //localStorage.clear();
-        localStorage.setItem(item, JSON.stringify(data));
-    };
-    return {
-        getDataLocalStorage     : getDataLocalStorage,
-        setDataLocalStorage     : setDataLocalStorage
-    };
-    
-})();
-
-
-*/
 
 
